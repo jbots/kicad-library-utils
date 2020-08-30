@@ -28,6 +28,7 @@ parser.add_argument('--fix', help='fix the violations if possible', action='stor
 parser.add_argument('--fixmore', help='fix additional violations, not covered by --fix (e.g. rectangular courtyards), implies --fix!', action='store_true')
 parser.add_argument('--rotate', help='rotate the whole symbol clockwise by the given number of degrees', action='store', default=0)
 parser.add_argument('-r', '--rule', help='specify single rule to check (default = check all rules)', action='store')
+parser.add_argument('--exclude',help='Exclude a particular rule (or rules) to check against. Use comma separated values to select multiple rules. e.g. "-e F6.2,F3.1"')
 parser.add_argument('--nocolor', help='does not use colors to show the output', action='store_true')
 parser.add_argument('-v', '--verbose', help='Enable verbose output. -v shows brief information, -vv shows complete information', action='count')
 parser.add_argument('-s', '--silent', help='skip output for symbols passing all checks', action='store_true')
@@ -55,12 +56,18 @@ if args.rule:
 else:
     selected_rules = None
 
+if args.exclude:
+    excluded_rules = args.exclude.split(',')
+else:
+    excluded_rules = None
+
 rules = []
 
 for r in all_rules:
     r_name = r.replace('_', '.')
     if selected_rules == None or r_name in selected_rules:
-        rules.append(globals()[r].Rule)
+        if excluded_rules == None or r_name not in excluded_rules:
+            rules.append(globals()[r].Rule)
 
 files = []
 
